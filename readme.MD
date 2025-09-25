@@ -20,6 +20,7 @@ Create IAM Policy
 aws iam create-policy \
     --policy-name AWSLoadBalancerControllerIAMPolicy \
     --policy-document file://iam-policy.json
+    
 
 Create IAM role and K8 service. Mapping between IAM Role and Kubernetes service account
 
@@ -35,3 +36,5 @@ eksctl create iamserviceaccount \
 # Install Load Balancer controller drivers
 
 helm repo add eks https://aws.github.io/eks-charts
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=$CLUSTER_NAME --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller

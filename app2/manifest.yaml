@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: app2
+  # deployment labels
+  labels:
+    purpose: deployment-demo
+    project: roboshop
+    app: app2
+spec:
+  replicas: 2
+  #these are the labels replica set use to create pod replicas , this should match pod labels
+  selector:
+    matchLables:
+      purpose: deployment-demo
+      project: roboshop
+      app: app2
+  #this is Pod definition
+  template:
+    metadata:
+      labels:
+        purpose: deployment
+        project: roboshop
+        app:  app2
+  spec:
+    containers:
+    - name: app2
+      image: anjuma11/app2:v1
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2
+  labels:
+    purpose: ingress
+spec:
+  selectors:
+    purpose: ingress
+    project: roboshop
+    environment: dev
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app2
+  ingressClassName:
+  annotations:
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: #provide your certificate arn here
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: roboshop
+spec:
+  rules:
+  - host: "app2.anjuma.store"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app2
+            port:
+              number: 80
+
